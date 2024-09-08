@@ -1,0 +1,44 @@
+@startuml
+
+'<SETTINGS>'
+autonumber
+autoactivate on
+skinparam maxMessageSize 210
+'</SETTINGS>'
+
+title "Диаграмма последовательности поиска товара в магазине"
+
+'<PARTICIPANTS>'
+Actor client #LightGreen
+participant "CLIENT BROWSER" as browser
+'
+box "BACKEND" #LightBlue
+    participant GATEWAY as gateway
+    participant "GOODS SEVICE" as goods
+    participant "BASKET SERVICE" as basket
+end box
+'<\PARTICIPANTS>'
+
+'<LOGIC>'
+== Поиск товаров ==
+client -> browser: ввожу данные для поиска товара
+browser -> gateway: GET /products/search
+gateway -> goods: GET /products/search
+goods -> goods: поиск товаров по указанным параметрам
+goods --> goods:
+goods --> gateway: список товаров
+gateway --> browser: список товаров
+browser --> client: отображение списка товаров
+== Добавление товара в корзину ==
+client -> browser: Добавление товара в корзину
+browser -> gateway: PATCH /baskets/product/1/add
+gateway -> basket: PATCH /baskets/product/1/add
+basket -> basket: добавление товара в корзину
+basket --> basket
+basket --> gateway: ОК
+gateway --> browser: ОК
+browser --> client: "Товар добавлен"
+'<\LOGIC>'
+
+@enduml
+

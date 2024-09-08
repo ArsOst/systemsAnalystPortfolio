@@ -1,0 +1,78 @@
+@startuml
+'<SETTINGS>'
+autonumber
+autoactivate on
+skinparam maxMessageSize 210
+'</SETTINGS>'
+
+title "Диаграмма последовательности проведения оплаты пользователем"
+
+'<PARTICIPANTS>'
+Actor client #LightGreen
+'Actor administrator #Red
+participant "CLIENT BROWSER" as browser
+'
+box "BACKEND" #LightBlue
+    participant GATEWAY as gateway
+'    participant "AUTH SERVICE" as auth
+'    participant "GOODS SEVICE" as goods
+'    participant "BASKET SERVICE" as basket
+    participant "ORDER SERVICE" as orders
+'    participant "DELIVERY SERVICE" as delivery
+    participant "PAYMENTS SERVICE" as payments
+    participant "NOTIFICATION SERVICE" as notification
+end box
+'
+'box "INTERNAL SYSTEM" #Yellow
+'participant "CRM" as crm
+'participant "WMS" as wms
+'end box
+'
+box "OUTSIDE SYSTEM"
+'participant "Identity provider" as idpr_out_serv
+'participant "DELIVERY OUT SERVICE" as delivery_out_serv
+participant "PAYMENTS OUT SERVICE" as payments_out_serv
+end box
+'<\PARTICIPANTS>'
+
+'<LOGIC>'
+''https://pay.yandex.ru/ru/docs/payments/basic
+client -> browser: нажимаю на кнопку "Оплатить через Yandex Pay"
+browser -> gateway: POST \payments
+gateway -> payments: POST \payments
+payments -> payments: создаю оплату
+payments --> payments: создаю оплату
+payments -> payments_out_serv: \orders \nпередаю информацию о заказе, \nтоваров в корзине, \n обратный URL
+payments_out_serv -> payments_out_serv: формирую заявку для товаров и формирую ссылку
+payments_out_serv --> payments_out_serv:
+payments_out_serv --> payments: OК
+payments --> gateway: OK
+gateway --> browser: OK
+browser --> client: Передаю ссылку на оплату в SDK
+|||
+client -> browser: регистрируюсь или вхожу в Yandex ID
+browser -> payments_out_serv: авторизируюсь в сервисе
+payments_out_serv --> browser: OK
+browser --> client: отображаю форму оплаты
+|||
+client -> browser: оплачиваю
+browser -> payments_out_serv: передаю данные об оплате
+payments_out_serv -> payments_out_serv: провожу оплату товара
+payments_out_serv --> payments_out_serv
+payments_out_serv -> gateway: /webhook
+gateway -> payments: PATCH \payments\{id}
+payments -> payments: сохраняю данные по оплате
+payments --> payments:
+payments -> orders: меняю статус заказа на оплачено
+orders --> payments: OK
+payments -> notification: отправляю письмо с чеком на почту пользователя
+notification --> payments: OК
+payments --> gateway: OK
+gateway --> payments_out_serv: OK
+payments_out_serv --> browser: OK редирект на сайт со страницей заказа
+browser --> client: открываю страницу заказа
+
+'<\LOGIC>'
+
+@enduml
+

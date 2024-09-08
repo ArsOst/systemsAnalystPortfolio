@@ -1,0 +1,65 @@
+@startuml
+'<SETTINGS>'
+autonumber
+autoactivate on
+skinparam maxMessageSize 125
+'</SETTINGS>'
+
+title "Диаграмма последовательности оформления заказа пользователем"
+
+'<PARTICIPANTS>'
+Actor client #LightGreen
+'Actor administrator #Red
+participant "CLIENT BROWSER" as browser
+'
+box "BACKEND" #LightBlue
+    participant GATEWAY as gateway
+'    participant "AUTH SERVICE" as auth
+    participant "GOODS SEVICE" as goods
+    participant "BASKET SERVICE" as basket
+    participant "ORDER SERVICE" as orders
+    participant "DELIVERY SERVICE" as delivery
+    participant "PAYMENTS SERVICE" as payments
+'    participant "NOTIFICATION SERVICE" as notification
+end box
+'
+'box "INTERNAL SYSTEM" #Yellow
+'participant "CRM" as crm
+'participant "WMS" as wms
+'end box
+'
+'box "OUTSIDE SYSTEM"
+'participant "Identity provider" as idpr
+'participant "DELIVERY OUT SERVICE" as delivery_out_serv
+'participant "PAYMENTS OUT SERVICE" as payments_out_serv
+'end box
+'<\PARTICIPANTS>'
+
+'<LOGIC>'
+''https://pay.yandex.ru/ru/docs/payments/basic
+client -> browser: Нажимаю "Оформить заказ"
+browser -> gateway: PATCH /orders/{id}/send
+gateway -> orders: PATCH /orders/{id}/send
+|||
+orders -> goods: резервирую товары
+'goods -> goods: резервирую товары
+goods --> orders: ОК. Товары зарезервированы
+|||
+orders -> payments: оплатить заказ
+payments -> payments: процесс оплаты заказа
+payments --> payments
+payments --> orders
+|||
+orders -> delivery: создаю доставку
+delivery -> delivery: процесс оформления доставки
+delivery --> delivery
+delivery --> orders: ОК. Доставка оформлена
+|||
+orders --> gateway: ОК. Заказ сформирован
+gateway --> browser: ОК. Заказ сформирован
+browser --> client: Вывожу форму оплаты товара
+
+'<\LOGIC>'
+
+@enduml
+

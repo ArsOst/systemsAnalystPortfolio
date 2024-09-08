@@ -1,0 +1,39 @@
+@startuml
+'<SETTINGS>'
+autonumber
+autoactivate on
+skinparam maxMessageSize 210
+'</SETTINGS>'
+
+
+title "Диаграмма последовательности оформления доставки заказа"
+
+'<PARTICIPANTS>'
+box "BACKEND" #LightBlue
+participant "ORDER SERVICE" as orders
+participant "DELIVERY SERVICE" as delivery
+end box
+box "OUTSIDE SYSTEM"
+participant "DELIVERY OUT SERVICE" as delivery_out_serv
+end box
+'<\PARTICIPANTS>'
+
+'<LOGIC>'
+orders -> delivery: POST /deliveries
+|||
+delivery -> delivery: авторизируюсь на СДЭК
+delivery -> delivery_out_serv: https://api.edu.cdek.ru/v2/oauth/token?parameters
+delivery_out_serv --> delivery: OK
+delivery --> delivery
+|||
+delivery -> delivery: регистриурю товар
+delivery -> delivery_out_serv: https://api.cdek.ru/v2/orders
+delivery_out_serv --> delivery: OK
+delivery --> delivery: регистриурю товар
+|||
+delivery --> orders: ОК. Доставка оформлена
+
+'<\LOGIC>'
+
+@enduml
+

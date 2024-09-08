@@ -1,0 +1,65 @@
+@startuml
+'<SETTINGS>'
+autonumber
+autoactivate on
+skinparam maxMessageSize 210
+'</SETTINGS>'
+title "Диаграмма последовательности входа пользователя в систему"
+
+Actor client #LightGreen
+'Actor administrator #Red
+participant "CLIENT BROWSER" as browser
+'
+box "BACKEND" #LightBlue
+    participant GATEWAY as gateway
+    participant "AUTH SERVICE" as auth
+'    participant "GOODS SEVICE" as goods
+'    participant "BASKET SERVICE" as basket
+'    participant "ORDER SERVICE" as orders
+'    participant "DELIVERY SERVICE" as delivery
+'    participant "PAYMENTS SERVICE" as payments
+    participant "NOTIFICATION SERVICE" as notification
+end box
+'
+'box "INTERNAL SYSTEM" #Yellow
+'participant "CRM" as crm
+'participant "WMS" as wms
+'end box
+'
+box "OUTSIDE SYSTEM"
+participant "Identity provider" as idpr_out_serv
+'participant "DELIVERY OUT SERVICE" as delivery_out_serv
+'participant "PAYMENTS OUT SERVICE" as payments_out_serv
+end box
+'<\PARTICIPANTS>'
+
+'<LOGIC>'
+== Вход пользователя в систему используя логин и пароль ==
+client -> browser: Ввод логина и пароля
+browser -> gateway: POST /auth/sign-in
+gateway ->  auth: POST /auth/sign-in
+auth -> auth: поиск логина и пароля пользователя
+auth --> auth:
+auth --> gateway: OK
+gateway --> browser: OK
+browser --> client: открываю доступ к платформе
+== Вход пользователя в систему, используя OpenID Provider ==
+client -> browser: выбирает авторизацию через OpenID приложение
+browser -> idpr_out_serv: перенаправляет на сайт провайдера
+idpr_out_serv --> browser: запрашивает данные пользователя
+browser --> client: открывает окно логина в систему провайдера
+client -> browser: вводит логин и пароль от учетки провайдера
+browser -> idpr_out_serv: передает логин и пароль и ссылку на будущий редирект
+idpr_out_serv -> gateway: OAuth токен
+gateway -> auth: OAuth токен
+auth -> idpr_out_serv: запрашиваю данные пользователя, используя токен
+idpr_out_serv --> auth: отдаю данные пользователья
+auth -> auth: ищу пользователя по переданным данным
+auth --> auth:
+auth --> gateway: OK
+gateway --> browser: OK
+browser --> client: открываю доступ к платформе
+'<\LOGIC>'
+
+@enduml
+

@@ -1,0 +1,344 @@
+openapi: 3.0.0
+info:
+  title: Online Electronics Store
+  description: Allow customer to view and order electronics goods
+  version: 1.0.0
+servers:
+  - url: https://onlinestore.com/v1
+tags:
+  - name: products
+    description: Operation about Products in the store
+  - name: baskets
+    description: Operation about own Basket of User
+  - name: orders
+    description: Operation about Order
+  - name: auth
+    description: Access to Online electronics store
+paths:
+  /products/search:
+    get:
+      tags:
+        - products
+      summary: find products by attributes
+      parameters: 
+        - in: query
+          name: category 
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: minimum_sum
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: maximum_sum
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: avaliable
+          required: false
+          schema: 
+            type: boolean
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+        - in: query 
+          name: size
+          required: true
+          schema:
+            type: integer 
+      responses:
+        '200':
+          description: An array of products
+          content:
+            application/json: 
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /products/{id}:
+    get:
+      tags:
+        - products
+      summary: find products by id
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema: 
+            type: integer
+      responses: 
+        '200':
+          description: The product
+          content: 
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/Product'
+  /baskets:
+    get:
+      tags:
+        - baskets
+      summary: open own basket
+      responses:
+        '200':
+          description: Basket with products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Basket'
+  /baskets/product/{id}/add:
+    patch:
+      tags:
+        - baskets
+      summary: add product to basket
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '200':
+          description: OK
+  /baskets/product/{id}/remove:
+    patch:
+      tags:
+        - baskets
+      summary: remove product from basket
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200': 
+          description: 'OK'
+  /baskets/product/{id}/deacrease-amount:
+    patch:
+      tags:
+        - baskets
+      summary: descriment count of product in the basket
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: 'Product ID'
+          schema:
+            type: integer
+      responses:
+        '200': 
+          description: 'OK'
+  /baskets/product/{id}/increase-amount:
+    patch:
+      tags:
+        - baskets
+      summary: increment count of product in the basket
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: 'Product ID'
+          schema:
+            type: integer
+      responses:
+        '200': 
+          description: 'OK'
+  /basckets/order:
+    post:
+      tags:
+        - baskets
+      summary: create order from products in basket
+      responses:
+        '200': 
+          description: 'OK'
+  /orders/{id}:
+    get:
+      tags:
+        - orders
+      summary: find order by id
+      parameters:
+        - in: path
+          name: id
+          description: Order ID
+          required: true
+          schema: 
+            type: integer
+      responses:
+        '200': 
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+    delete:
+      tags:
+        - orders
+      summary: delete order 
+      parameters:
+        - in: path
+          name: id
+          description: Order ID
+          required: true
+          schema: 
+            type: integer
+      responses:
+        '200': 
+          description: Order is deleted
+  /orders/search:
+    get:
+      tags:
+        - orders
+      summary: find order by attributes
+      parameters:
+        - in: query
+          name: number
+          description: Order number
+          schema: 
+            type: string
+        - in: query
+          name: created_date_from
+          schema: 
+            type: string
+        - in: query
+          name: created_date_to
+          schema: 
+            type: string
+        - in: query
+          name: status
+          schema: 
+            $ref: '#/components/schemas/OrderStatusEnum'
+      responses:
+        '200': 
+          description: Order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+  /orders/{id}/send:
+    patch:
+      tags:
+        - orders
+      summary: pays order and send 
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200': 
+          description: Order send
+  /auth/sign-in:
+    post:
+      tags:
+        - auth
+      summary: login to system
+      responses:
+        '200': 
+          description: OK
+  /auth/sign-out:
+    post:
+      tags:
+        - auth
+      summary: logout from system
+      responses:
+        '200': 
+          description: OK
+  /auth/registration:
+    post:
+      tags:
+        - auth
+      summary: registration in platform
+      responses:
+        '200': 
+          description: OK
+  /auth/password/restore:
+    post:
+      tags:
+        - auth
+      summary: create link to restore forgotten password  
+      responses:
+        '200': 
+          description: OK
+components: 
+  schemas:
+    Product:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        created_date:
+          type: string
+          format: date-time
+          example: '2024-07-13 00:00:000'
+        category:
+          type: string
+          example: 'phones'
+        sum:
+          type: integer
+          example: '10000'
+        avaliable_cnt:
+          type: integer
+          example: 7
+    Basket:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        products:
+          type: array
+          items: 
+            $ref: '#/components/schemas/Product'
+    OrderStatusEnum:
+      type: string
+      format: data
+      enum:
+        - unsent
+        - payed
+        - sent
+        - arrived
+        - error
+        - stopped
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        created_date:
+          type: string
+          format: data
+        number:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/OrderStatusEnum'
+        delivery_id:
+          type: integer
+          format: int64
+        payment_id:
+          type: integer
+          format: int64
+  responses: 
+    Unauthorized:
+      description: Unauthorized
+    UnexpectedError: 
+      description: Unexpected error.

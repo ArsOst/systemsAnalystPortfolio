@@ -1,0 +1,138 @@
+@startuml
+'https://plantuml.com/class-diagram
+'RELATION'
+
+'skinparam linetype polyline
+skinparam linetype ortho
+
+together {
+    class user_roles
+    class user_roles_permissions_map
+    class role_permissions
+}
+
+together {
+    class baskets
+    class addresses
+    class users
+}
+
+together {
+    class orders
+    class products_orders_map
+    class payments
+    class deliveries
+}
+
+users --> user_roles
+user_roles_permissions_map --> user_roles
+user_roles_permissions_map --> role_permissions
+addresses --> users
+baskets --> users
+products_basket_map -> product_phones
+baskets -> product_phones
+orders -> payments
+orders -> deliveries
+products_orders_map -> orders
+products_orders_map -> product_phones
+
+'ENTITIES'
+class users {
+    id
+    created_date
+    login
+    password
+    first_name
+    last_name
+    middle_name
+    email
+    phone
+    role_id
+}
+
+
+class user_roles {
+    id
+    name
+    desciprions
+}
+
+class user_roles_permissions_map {
+    role_id
+    permission_id
+}
+
+class role_permissions {
+    id
+    name
+    entities_type
+    action_type
+}
+
+class product_phones {
+    id
+    created_date
+    category
+    brand
+    os_system
+    sum
+    count_available
+}
+
+class baskets {
+    id
+    created_date
+    user_id
+}
+
+class products_basket_map {
+    product_id
+    basket_id
+    product_count
+}
+
+class orders {
+    id
+    created_date
+    number
+    status
+    delivery_id
+    payment_id
+}
+
+class products_orders_map {
+    order_id
+    product_id
+}
+
+class deliveries {
+    id
+    created_date
+    delivery_provider
+    send_date
+    address_id
+    arriving_id
+}
+
+class addresses {
+    id
+    created_date
+    full_name
+    country
+    region
+    district
+    street
+    house
+    appartment
+    user_id
+}
+
+class payments {
+    id
+    created_date
+    bank
+    sum
+}
+
+
+@enduml

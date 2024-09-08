@@ -1,0 +1,24 @@
+@startmindmap
+*_ <b>СТРАТЕГИЧЕСКИЕ РЕШЕНИЯ</b>
+**[#lightblue] <u>Технологии</u>
+***[#lightblue] Java
+***[#lightblue] PostgreSQL
+***[#lightblue] JS/React
+***[#lightblue] REST API
+***[#lightblue] RabbitMQ
+***[#lightblue] Kubernetes
+**[#Orange] <u>Декомпозиция</u>
+***[#Orange] OpenID
+***[#Orange] Платежный сервис
+***[#Orange] Сервис Доставки
+***[#Orange] Почтовый сервис
+left side
+**[#lightgreen] <u>Архитектурный стиль</u>
+***[#lightgreen] MSA
+***[#lightgreen] Пакеторование данных по фичам
+**[#FFBBCC] <u>Цели качества</u>
+***[#FFBBCC] Производительность
+***[#FFBBCC] Масштабируемость
+***[#FFBBCC] Доступность
+***[#FFBBCC] Безопасность
+@endmindmap

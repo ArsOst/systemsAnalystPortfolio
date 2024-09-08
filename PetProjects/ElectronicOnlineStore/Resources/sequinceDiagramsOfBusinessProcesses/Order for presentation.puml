@@ -1,0 +1,102 @@
+@startuml
+'<SETTINGS>'
+autonumber
+autoactivate on
+skinparam maxMessageSize 125
+'</SETTINGS>'
+
+title "Диаграмма последовательности оформления заказа пользователем"
+
+'<PARTICIPANTS>'
+Actor client #LightGreen
+'Actor administrator #Red
+participant "CLIENT BROWSER" as browser
+'
+box "BACKEND" #LightBlue
+    participant GATEWAY as gateway
+'    participant "AUTH SERVICE" as auth
+    participant "GOODS SEVICE" as goods
+    participant "BASKET SERVICE" as basket
+    participant "ORDER SERVICE" as orders
+    participant "DELIVERY SERVICE" as delivery
+'    participant "PAYMENTS SERVICE" as payments
+'    participant "NOTIFICATION SERVICE" as notification
+end box
+'
+'box "INTERNAL SYSTEM" #Yellow
+'participant "CRM" as crm
+'participant "WMS" as wms
+'end box
+'
+'box "OUTSIDE SYSTEM"
+'participant "Identity provider" as idpr
+'participant "DELIVERY OUT SERVICE" as delivery_out_serv
+'participant "PAYMENTS OUT SERVICE" as payments_out_serv
+'end box
+'<\PARTICIPANTS>'
+
+'<LOGIC>'
+client -> browser: открывает корзину
+browser -> gateway: GET /basket
+gateway -> basket: GET /basket
+basket --> gateway: OK
+gateway --> browser: OK
+browser --> client: отображение корзины
+client -> browser: нажимаю "оформить заказ"
+browser -> gateway: POST /orders/create
+gateway -> orders: POST /orders/create
+'orders -> orders: создаю заказ с продуктами
+orders --> gateway: заказ создан
+gateway --> browser: заказ создан
+browser --> client: открывает страницу с заказом
+
+
+== Оплата товара на примере способа оплаты через Yandex PAY==
+
+client -> browser: нажимаю "Указать способ доставки"
+browser --> client: открываю модальное окно заполнения данных доставки
+client -> browser: указываю свой адрес, вид доставки и нажимаю "Далее"
+browser --> client: открываю заказ с заполненным полем "Доставка"
+|||
+client -> browser: нажимаю "Указать способ оплаты"
+browser --> client: открываю модальное окно заполнения данных по оплате
+client -> browser: выбираю способ оплаты и нажимаю "Далее"
+browser --> client: открываю заказ с заполненным полем "Доставка" и "Способ оплаты"
+|||
+''https://pay.yandex.ru/ru/docs/payments/basic
+client -> browser: Нажимаю "Оплатить заказ"
+browser -> gateway: PATCH /orders/{id}/send
+gateway -> orders: PATCH /orders/{id}/send
+|||
+orders -> goods: резервирую товары
+'goods -> goods: резервирую товары
+goods --> orders: ОК. Товары зарезервированы
+|||
+orders -> delivery: создаю доставку
+delivery -> delivery: оформляю доставку
+return
+delivery --> orders: ОК. Доставка оформлена
+'|||
+'orders -> payments: провожу оплату
+'payments -> payments: провожу оплату
+'return
+'payments --> orders: ОК. Заказ оплачен
+'|||
+'orders -> notification: отправляю сообщение с чеком операции
+''notification -> notification: отправляю через сервис письмо на почту клиента
+'notification --> orders: ОК. Письмо отправлено.
+'|||
+'orders -> basket: очищаю корзину
+''basket -> basket: удаляю товары из корзины
+'basket --> orders: ОК. корзина очищена
+
+
+'orders -> orders: меняю статус заказа
+orders --> gateway: ОК. Заказ сформирован
+gateway --> browser: ОК. Заказ сформирован
+browser --> client: Вывожу форму оплаты товара
+
+'<\LOGIC>'
+
+@enduml
+

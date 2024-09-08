@@ -1,0 +1,42 @@
+@startuml
+'<SETTINGS>'
+autonumber
+autoactivate on
+skinparam maxMessageSize 210
+'</SETTINGS>'
+'
+title "Диаграмма последовательности оформления доставки заказа"
+'
+'<PARTICIPANTS>'
+Actor client #LightGreen
+Actor administrator #Red
+participant "CLIENT BROWSER" as browser
+'
+box "BACKEND" #LightBlue
+    participant GATEWAY as gateway
+    participant "AUTH SERVICE" as auth
+    participant "GOODS SEVICE" as goods
+    participant "BASKET SERVICE" as basket
+    participant "ORDER SERVICE" as orders
+    participant "DELIVERY SERVICE" as delivery
+    participant "PAYMENTS SERVICE" as payments
+    participant "NOTIFICATION SERVICE" as notification
+end box
+'
+box "INTERNAL SYSTEM" #Yellow
+participant "CRM" as crm
+participant "WMS" as wms
+end box
+'
+box "OUTSIDE SYSTEM"
+participant "Identity provider" as idpr_out_serv
+participant "DELIVERY OUT SERVICE" as delivery_out_serv
+participant "PAYMENTS OUT SERVICE" as payments_out_serv
+end box
+'<\PARTICIPANTS>'
+'
+'<LOGIC>'
+'<\LOGIC>'
+
+@enduml
+
